@@ -30,12 +30,12 @@ jobs:
             libsqlite3-dev python3-dev \
             autoconf libtool pkg-config \
             zlib1g-dev libncurses5-dev \
-            cmake libltdl-dev
+            cmake libltdl-dev patch
 
       - name: Install buildozer
         run: |
           pip install --upgrade pip
-          pip install buildozer cython
+          pip install "cython<3.0.0" buildozer
 
       - name: Accept Android licenses
         run: |
@@ -45,7 +45,7 @@ jobs:
 
       - name: Build debug APK
         run: |
-          buildozer -v android debug
+          buildozer -v android debugg
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
