@@ -5,7 +5,7 @@ package.domain = org.myword
 source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf
 version = 1.0
-requirements = python3,kivy==2.3.0,kivymd==1.1.1,requests,urllib3,certifi,charset-normalizer,idna,openssl
+requirements = python3,kivy==2.3.0,kivymd==1.1.1,requests,urllib3,certifi,charset-normalizer,idna,openssl,plyer,pillow,setuptools
 orientation = portrait
 fullscreen = 0
 
@@ -15,7 +15,7 @@ android.ndk = 25b
 android.sdk = 34
 android.ndk_api = 26
 
-android.permissions = INTERNET
+android.permissions = INTERNET, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE
 android.archs = arm64-v8a
 android.allow_backup = True
 android.accept_sdk_license = True
