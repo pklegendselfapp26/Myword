@@ -5,7 +5,10 @@ package.domain = org.myword
 source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf
 version = 1.0
-requirements = python3,kivy==2.3.0,kivymd==1.1.1,requests,urllib3,certifi,charset-normalizer,idna,openssl,plyer,pillow,setuptools
+
+# Simplified requirements so p4a doesn't trip over itself
+requirements = python3,kivy==2.3.0,kivymd==1.1.1,requests,openssl,plyer,pillow
+
 orientation = portrait
 fullscreen = 0
 
