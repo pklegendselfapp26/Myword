@@ -1,10 +1,38 @@
+import sys
+import traceback
+
+# --- CRASH CATCHER ---
+# This sits at the very top to catch ANY error before the app closes.
+def crash_catcher(exctype, value, tb):
+    error_msg = "".join(traceback.format_exception(exctype, value, tb))
+    
+    # Try to save the crash log to public folders where you can easily find it
+    paths_to_try = [
+        "/storage/emulated/0/Download/myword_crash_log.txt",
+        "/storage/emulated/0/Documents/myword_crash_log.txt"
+    ]
+    
+    for path in paths_to_try:
+        try:
+            with open(path, "w") as f:
+                f.write("--- MY WORD APP CRASH REPORT ---\n\n")
+                f.write(error_msg)
+            break  # Stop trying if it successfully wrote the file
+        except Exception:
+            continue
+
+# Tell Python to use our crash catcher if it encounters a fatal error
+sys.excepthook = crash_catcher
+
+# ==========================================
+# STANDARD IMPORTS AND APP CODE START HERE
+# ==========================================
 import json
 import os
 import time
 import random
 import csv
-import threading
-import requests
+import urllib.parse
 import webbrowser
 from datetime import datetime, timedelta
 
@@ -14,7 +42,7 @@ from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import StringProperty
 from kivy.uix.screenmanager import SlideTransition
-from kivy.clock import Clock
+from kivy.network.urlrequest import UrlRequest
 
 from kivymd.app import MDApp
 from kivymd.uix.screenmanager import MDScreenManager
@@ -351,35 +379,44 @@ class AddWordScreen(MDScreen):
             toast("Type a word first!")
             return
         toast("Fetching meaning...")
-        threading.Thread(target=self._api_call, args=(word,), daemon=True).start()
+        
+        safe_word = urllib.parse.quote(word)
+        url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{safe_word}"
+        
+        UrlRequest(
+            url,
+            on_success=self.on_fetch_success,
+            on_failure=self.on_fetch_failure,
+            on_error=self.on_fetch_error,
+            timeout=8
+        )
 
-    def _api_call(self, word):
-        try:
-            res = requests.get(
-                f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}",
-                timeout=8
-            )
-            if res.status_code == 200:
-                data = res.json()[0]
-                meanings = data.get("meanings", [])
-                pos = "Uncategorized"
-                def_text = ""
-                ex_text = ""
-                if meanings:
-                    pos = meanings[0].get("partOfSpeech", "Uncategorized").capitalize()
-                    def_text = meanings[0]["definitions"][0].get("definition", "")
-                    for meaning in meanings:
-                        for definition in meaning.get("definitions", []):
-                            if "example" in definition and definition["example"]:
-                                ex_text = definition["example"]
-                                break
-                        if ex_text:
+    def on_fetch_success(self, req, result):
+        if isinstance(result, list) and len(result) > 0:
+            data = result[0]
+            meanings = data.get("meanings", [])
+            pos = "Uncategorized"
+            def_text = ""
+            ex_text = ""
+            if meanings:
+                pos = meanings[0].get("partOfSpeech", "Uncategorized").capitalize()
+                def_text = meanings[0]["definitions"][0].get("definition", "")
+                for meaning in meanings:
+                    for definition in meaning.get("definitions", []):
+                        if "example" in definition and definition["example"]:
+                            ex_text = definition["example"]
                             break
-                Clock.schedule_once(lambda dt: self._update_ui(pos, def_text, ex_text))
-            else:
-                Clock.schedule_once(lambda dt: toast("Word not found in API!"))
-        except Exception:
-            Clock.schedule_once(lambda dt: toast("Network Error. Check connection."))
+                    if ex_text:
+                        break
+            self._update_ui(pos, def_text, ex_text)
+        else:
+            toast("Word not found in API!")
+
+    def on_fetch_failure(self, req, result):
+        toast("Word not found in API!")
+
+    def on_fetch_error(self, req, error):
+        toast("Network Error. Check connection.")
 
     def _update_ui(self, pos, def_text, ex_text):
         if pos in self.ids.category_spinner.values:
@@ -628,7 +665,6 @@ class MyWordApp(MDApp):
         return Builder.load_file("main.kv")
 
     def on_start(self):
-        # MOVE ANDROID CODE HERE: This runs safely AFTER the UI is created.
         if platform == 'android':
             try:
                 from android.permissions import request_permissions, Permission
