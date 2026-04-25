@@ -45,6 +45,8 @@ jobs:
 
       - name: Build debug APK
         run: |
+          export GRADLE_OPTS="-Xmx2048m -Dorg.gradle.daemon=false"
+          export JAVA_OPTS="-Xmx2048m"
           buildozer -v android debug
 
       - name: Upload APK artifact
