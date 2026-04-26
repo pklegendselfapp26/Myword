@@ -6,19 +6,17 @@ source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf
 version = 1.0
 
-# Added openssl back for native secure HTTPS dictionary lookups
-# Bumped Kivy to 2.3.0 which is the most stable for modern Android
 requirements = python3,kivy==2.3.0,kivymd==1.1.1,plyer,pillow,openssl
 
 orientation = portrait
 fullscreen = 0
 
-# === THE CRITICAL FIX ===
-# Downgrading to 33 bypasses Android 14's fatal pthread_mutex_lock crash
-android.minapi = 24
-android.api = 33
-android.ndk = 25b
-android.ndk_api = 24
+# === THE 16KB MEMORY ALIGNMENT FIX ===
+# Upgrading to NDK 27c compiles the C-engine into 16KB pages for Android 15/16
+android.minapi = 26
+android.api = 34
+android.ndk = 27c
+android.ndk_api = 26
 
 android.permissions = INTERNET, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE
 android.archs = arm64-v8a
@@ -29,3 +27,6 @@ android.enable_androidx = True
 [buildozer]
 log_level = 2
 warn_on_root = 1
+
+# Pull the latest python-for-android branch to support NDK 27+
+p4a.branch = develop
