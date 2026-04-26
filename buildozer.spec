@@ -6,13 +6,14 @@ source.dir = .
 source.include_exts = py,kv,json,png,jpg,ttf
 version = 1.0
 
-requirements = python3,kivy==2.3.0,kivymd==1.1.1,plyer,pillow,openssl
+# === THE NDK 27 COMPILATION FIX ===
+# Upgrading to Kivy 2.3.1 fixes the GitHub wheel compilation crash
+requirements = python3,kivy==2.3.1,kivymd==1.1.1,plyer,pillow,openssl
 
 orientation = portrait
 fullscreen = 0
 
-# === THE 16KB MEMORY ALIGNMENT FIX ===
-# Upgrading to NDK 27c compiles the C-engine into 16KB pages for Android 15/16
+# The 16KB memory alignment for modern processors
 android.minapi = 26
 android.api = 34
 android.ndk = 27c
@@ -28,5 +29,5 @@ android.enable_androidx = True
 log_level = 2
 warn_on_root = 1
 
-# Pull the latest python-for-android branch to support NDK 27+
+# Pull the bleeding-edge Android wrapper to support NDK 27
 p4a.branch = develop
