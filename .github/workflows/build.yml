@@ -38,7 +38,11 @@ jobs:
       - name: Install buildozer
         run: |
           pip install --upgrade pip
-          pip install "cython<3.0.0" buildozer
+          pip install "cython<3.0.0"
+          
+          # === THE FIX: Use the bleeding-edge master branches ===
+          pip install git+https://github.com/kivy/buildozer.git@master
+          pip install git+https://github.com/kivy/python-for-android.git@develop
 
       - name: Accept Android licenses
         run: |
