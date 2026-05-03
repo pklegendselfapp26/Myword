@@ -40,9 +40,8 @@ jobs:
           pip install --upgrade pip
           pip install "cython<3.0.0"
           
-          # === THE FIX: Use the bleeding-edge master branches ===
-          pip install git+https://github.com/kivy/buildozer.git@master
-          pip install git+https://github.com/kivy/python-for-android.git@develop
+          # Reverting to the stable PyPI version of Buildozer
+          pip install buildozer
 
       - name: Accept Android licenses
         run: |
@@ -51,6 +50,14 @@ jobs:
       - name: Build debug APK
         run: |
           export GRADLE_OPTS="-Xmx2048m -Dorg.gradle.daemon=false"
+          
+          # === THE 16KB ALIGNMENT MAGIC ===
+          # These flags force NDK 25b to compile your app for Android 16's strict processor
+          export LDFLAGS="-Wl,-z,max-page-size=16384"
+          export CFLAGS="-Wl,-z,max-page-size=16384"
+          export CXXFLAGS="-Wl,-z,max-page-size=16384"
+          export APP_LDFLAGS="-Wl,-z,max-page-size=16384"
+          
           buildozer -v android debug
 
       - name: Upload APK artifact
